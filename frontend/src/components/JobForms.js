@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+
 import API from "../services/api";
 
+import { AuthContext } from "../context/AuthContext";
+
 function JobForm() {
+
+    const { auth } = useContext(AuthContext);
 
     const [job, setJob] = useState({
         name: "",
@@ -24,7 +29,19 @@ function JobForm() {
 
         try {
 
-            await API.post("", job);
+            await API.post(
+
+                "/jobs",
+
+                job,
+
+                {
+                    auth: {
+                        username: auth.username,
+                        password: auth.password
+                    }
+                }
+            );
 
             alert("Job Created!");
 
@@ -43,62 +60,62 @@ function JobForm() {
         }
     };
 
-   return (
+    return (
 
-    <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="bg-white shadow-lg rounded-xl p-6">
 
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl shadow-md">
-            Create Job
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-            <input
-                type="text"
-                name="name"
-                placeholder="Job Name"
-                value={job.name}
-                onChange={handleChange}
-                className="w-full border p-3 rounded-lg"
-            />
-
-            <input
-                type="text"
-                name="command"
-                placeholder="Command"
-                value={job.command}
-                onChange={handleChange}
-                className="w-full border p-3 rounded-lg"
-            />
-
-            <input
-                type="datetime-local"
-                name="scheduledTime"
-                value={job.scheduledTime}
-                onChange={handleChange}
-                className="w-full border p-3 rounded-lg"
-            />
-
-            <input
-                type="text"
-                name="cronExpression"
-                placeholder="Example: 0 */5 * * * *"
-                value={job.cronExpression}
-                onChange={handleChange}
-                className="w-full border p-3 rounded-lg"
-            />
-
-            <button
-                type="submit"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-            >
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-3 rounded-xl shadow-md">
                 Create Job
-            </button>
+            </h2>
 
-        </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-    </div>
-);
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Job Name"
+                    value={job.name}
+                    onChange={handleChange}
+                    className="w-full border p-3 rounded-lg"
+                />
+
+                <input
+                    type="text"
+                    name="command"
+                    placeholder="Command"
+                    value={job.command}
+                    onChange={handleChange}
+                    className="w-full border p-3 rounded-lg"
+                />
+
+                <input
+                    type="datetime-local"
+                    name="scheduledTime"
+                    value={job.scheduledTime}
+                    onChange={handleChange}
+                    className="w-full border p-3 rounded-lg"
+                />
+
+                <input
+                    type="text"
+                    name="cronExpression"
+                    placeholder="Example: 0 */5 * * * *"
+                    value={job.cronExpression}
+                    onChange={handleChange}
+                    className="w-full border p-3 rounded-lg"
+                />
+
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                >
+                    Create Job
+                </button>
+
+            </form>
+
+        </div>
+    );
 }
 
 export default JobForm;

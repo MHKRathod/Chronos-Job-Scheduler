@@ -1,68 +1,85 @@
 package com.chronos.scheduler.security;
 
+import com.chronos.scheduler.repository.UserRepository;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import org.springframework.security.config.Customizer;
+
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import org.springframework.security.core.userdetails.User;
+
+import org.springframework.security.core.userdetails.UserDetailsService;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
+    private final UserRepository userRepository;
 
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("admin")
-                .password("admin123")
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
+    public SecurityConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public UserDetailsService userDetailsService() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        return username -> {
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+            var appUser = userRepository
+                    .findByUsername(username)
+                    .orElseThrow(() ->
+                            new RuntimeException("User not found")
+                    );
 
-        configuration.setAllowedMethods(List.of("*"));
-
-        configuration.setAllowedHeaders(List.of("*"));
-
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
+            return User.builder()
+                    .username(appUser.getUsername())
+                    .password(appUser.getPassword())
+                    .roles(appUser.getRole())
+                    .build();
+        };
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public PasswordEncoder passwordEncoder() {
 
+        return new BCryptPasswordEncoder();
+    }
 
-                http
-    .cors(cors -> {})
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
+
+        http
+
+                .cors(Customizer.withDefaults())
+
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
-                )
 
-                .httpBasic(httpBasic -> {});
+                        .requestMatchers(
+                                "/auth/signup"
+                        ).permitAll()
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.OPTIONS,
+                                "/**"
+                        ).permitAll()
+
+                        .anyRequest()
+                        .authenticated()
+                )
+                .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 }
