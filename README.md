@@ -1,4 +1,4 @@
-# Chronos - Distributed Job Scheduler
+# Chronos - Distributed Job Scheduler(CAPSTONE PROJECT)
 
 Chronos is a full-stack distributed job scheduling and monitoring system built using React.js, Spring Boot, Spring Security, and MySQL.
 
