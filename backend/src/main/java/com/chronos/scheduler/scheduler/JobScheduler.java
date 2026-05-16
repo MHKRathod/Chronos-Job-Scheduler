@@ -69,7 +69,16 @@ public class JobScheduler {
 
             jobRepository.save(job);
 
-            // Simulate job execution
+            // FORCE FAILURE FOR DEMO
+            if(job.getCommand()
+                    .equals("invalid-command")) {
+
+                throw new RuntimeException(
+                        "Invalid command"
+                );
+            }
+
+// Simulate job execution
             Thread.sleep(5000);
 
             log.setStatus("SUCCESS");

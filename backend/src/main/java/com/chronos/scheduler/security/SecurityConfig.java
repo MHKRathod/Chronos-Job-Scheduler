@@ -5,16 +5,15 @@ import com.chronos.scheduler.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 import org.springframework.security.core.userdetails.User;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,6 +24,7 @@ public class SecurityConfig {
     private final UserRepository userRepository;
 
     public SecurityConfig(UserRepository userRepository) {
+
         this.userRepository = userRepository;
     }
 
@@ -36,7 +36,9 @@ public class SecurityConfig {
             var appUser = userRepository
                     .findByUsername(username)
                     .orElseThrow(() ->
-                            new RuntimeException("User not found")
+                            new RuntimeException(
+                                    "User not found"
+                            )
                     );
 
             return User.builder()
@@ -66,18 +68,24 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // public endpoints
                         .requestMatchers(
-                                "/auth/signup"
+                                "/auth/signup",
+                                "/jobs/logs",
+                                "/jobs/failed"
                         ).permitAll()
 
+                        // allow preflight requests
                         .requestMatchers(
-                                org.springframework.http.HttpMethod.OPTIONS,
+                                HttpMethod.OPTIONS,
                                 "/**"
                         ).permitAll()
 
+                        // all remaining APIs secured
                         .anyRequest()
                         .authenticated()
                 )
+
                 .httpBasic(Customizer.withDefaults());
 
         return http.build();

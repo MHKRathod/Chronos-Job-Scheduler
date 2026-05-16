@@ -9,7 +9,7 @@ function JobLogs() {
 
         try {
 
-            const response = await API.get("/logs");
+            const response = await API.get("/jobs/logs");
 
             setLogs(response.data);
 
@@ -33,7 +33,7 @@ function JobLogs() {
 
     try {
 
-        await API.delete("/logs");
+        await API.delete("/jobs/logs");
 
         fetchLogs();
 

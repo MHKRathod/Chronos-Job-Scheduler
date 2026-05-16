@@ -53,10 +53,10 @@ public class JobExecutionService {
             Thread.sleep(5000);
 
             // FORCE FAILURE ONLY FOR FAILURE TEST JOBS
-            if (job.getName().contains("Failure")) {
+            if (job.getCommand().contains("invalid")) {
 
                 throw new RuntimeException(
-                        "Simulated failure"
+                        "Invalid command"
                 );
             }
 

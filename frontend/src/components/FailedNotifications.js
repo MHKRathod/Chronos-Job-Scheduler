@@ -9,7 +9,7 @@ function FailedNotifications() {
 
         try {
 
-            const response = await API.get("/failed");
+            const response = await API.get("/jobs/failed");
 
             setFailedJobs(response.data);
 
